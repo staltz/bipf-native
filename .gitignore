@@ -1,0 +1,6 @@
+deps/
+dist/
+node_modules/
+zig-cache
+pnpm-lock.yaml
+/test-compat

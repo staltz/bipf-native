@@ -1,0 +1,23 @@
+{
+  "name": "bipf-native",
+  "version": "1.0.0",
+  "description": "BIPF implemented in Zig as a native module",
+  "main": "index.js",
+  "scripts": {
+    "build": "mkdir -p dist && ZIG_SYSTEM_LINKER_HACK=1 zig build-lib -mcpu=baseline -OReleaseSmall -dynamic -lc -isystem deps/node-$(node --version)/include/node src/lib.zig -fallow-shlib-undefined -femit-bin=dist/lib.node",
+    "setup-compat-tests": "cpy ./node_modules/bipf/test/*.js ./test-compat && rm ./test-compat/perf.js",
+    "pretest": "npm run build-debug",
+    "test-compat": "npm run setup-compat-tests && tape test-compat/*.js | tap-spec",
+    "test-extra": "tape test-extra/*.js",
+    "test": "npm run build && npm run test-extra && npm run test-compat",
+    "postinstall": "./download-node-headers.sh"
+  },
+  "author": "Andre 'Staltz' Medeiros <contact@staltz.com>",
+  "license": "Unlicense",
+  "devDependencies": {
+    "bipf": "^1.5.3",
+    "cpy-cli": "^3.1.1",
+    "tap-spec": "^5.0.0",
+    "tape": "^5.3.2"
+  }
+}
