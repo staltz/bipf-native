@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "BIPF implemented in Zig as a native module",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "dist/*"
+  ],
   "scripts": {
     "build": "mkdir -p dist && ZIG_SYSTEM_LINKER_HACK=1 zig build-lib -mcpu=baseline -OReleaseSmall -dynamic -lc -isystem deps/node-$(node --version)/include/node src/lib.zig -fallow-shlib-undefined -femit-bin=dist/lib.node",
     "setup-compat-tests": "cpy ./node_modules/bipf/test/*.js ./test-compat && rm ./test-compat/perf.js",
