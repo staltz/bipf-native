@@ -12,7 +12,21 @@ Source code entry point is at `src/lib.zig`.
 
 ## TODO
 
-- Support all APIs that `bipf` (JS) supports
+- ~~Implement encodingLength~~
+- ~~Implement encode~~
+- ~~Implement decode~~
+- ~~Implement allocAndEncode~~
+- ~~Implement slice~~
+- ~~Implement seekKey~~
+- Implement seekPath
+- Implement iterate
+- Implement compareString
+- Implement compare
+- Implement createCompareAt
+- Implement getValueType
+- Implement getEncodedLength
+- Implement getEncodedType
+- Implement createSeekPath
 - Pass all tests
 - Compile for several targets and publish them under `dist/`, `index.js` should know how to pick the correct binary
 - Use a Zig package manager, maybe
