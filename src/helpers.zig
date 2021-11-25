@@ -194,3 +194,12 @@ pub fn u32ToJS(env: c.napi_env, value: u32) !c.napi_value {
     }
     return result;
 }
+
+pub fn i32ToJS(env: c.napi_env, value: i32) !c.napi_value {
+    var result: c.napi_value = undefined;
+    if (c.napi_create_int32(env, value, &result) != .napi_ok) {
+        return translate.throw(env, "Failed to create a int32");
+    }
+    return result;
+}
+
