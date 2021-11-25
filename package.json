@@ -13,7 +13,8 @@
     "test-compat": "npm run setup-compat-tests && tape test-compat/*.js | tap-spec",
     "test-extra": "tape test-extra/*.js",
     "test": "npm run build && npm run test-extra && npm run test-compat",
-    "postinstall": "./download-node-headers.sh"
+    "postinstall": "./download-node-headers.sh",
+    "start": "nodemon -e zig --watch src --exec npm run build --ignore src/zig-cache"
   },
   "author": "Andre 'Staltz' Medeiros <contact@staltz.com>",
   "license": "Unlicense",
@@ -21,6 +22,7 @@
     "bipf": "^1.5.3",
     "cpy-cli": "^3.1.1",
     "tap-spec": "^5.0.0",
-    "tape": "^5.3.2"
+    "tape": "^5.3.2",
+    "nodemon": "^2.0.15"
   }
 }
