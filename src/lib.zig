@@ -118,23 +118,28 @@ fn seekKey(env: c.napi_env, info: c.napi_callback_info) callconv(.C) c.napi_valu
     }
 
     var buffer = helpers.slice_from_value(env, argv[0], "1st arg") catch return null;
-    var start: u32 = undefined;
-    if (c.napi_get_value_uint32(env, argv[1], &start) != .napi_ok) {
+    var start_i: i32 = undefined;
+    if (c.napi_get_value_int32(env, argv[1], &start_i) != .napi_ok) {
         helpers.throw(env, "Failed to get start") catch return null;
+    }
+
+    if (start_i == -1) {
+        return helpers.i32ToJS(env, -1) catch return null;
     }
 
     var key: []u8 = undefined;
     if (helpers.isTypeof(env, argv[2], c.napi_valuetype.napi_string)) {
-        var string: [*c]u8 = undefined;
-        var len: usize = 2048;
-        var bytes: usize = undefined;
-        if (c.napi_get_value_string_utf8(env, argv[2], string, len, &bytes) != .napi_ok) {
-            helpers.throw(env, "3rd arg is not a string") catch return null;
-        }
+        // var string: []u8 = undefined;
+        // var len: usize = 2048;
+        // var bytes: usize = undefined;
+        // if (c.napi_get_value_string_utf8(env, argv[2], string, len, bytes) != .napi_ok) {
+        //     helpers.throw(env, "3rd arg is not a string") catch return null;
+        // }
+        helpers.throw(env, "Cannot handle strings as 3rd arg, use buffer") catch return null;
     } else {
         key = helpers.slice_from_value(env, argv[2], "3rd arg") catch return null;
     }
-    if (seek_key.seekKey(env, buffer, start, key)) |result| {
+    if (seek_key.seekKey(env, buffer, @intCast(u32, start_i), key)) |result| {
         return helpers.u32ToJS(env, result) catch return null;
     } else |err| switch(err) {
         error.NOTFOUND => return helpers.i32ToJS(env, -1) catch return null
