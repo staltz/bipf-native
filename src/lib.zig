@@ -134,7 +134,6 @@ fn seekKey(env: c.napi_env, info: c.napi_callback_info) callconv(.C) c.napi_valu
         var bytes: usize = undefined;
         var len: usize = 1024;
         key = allocator.alloc(u8, len) catch return null;
-        std.debug.print("Here\n", .{});
         if (c.napi_get_value_string_utf8(env, argv[2], @ptrCast([*c]u8, key), len, &bytes) != .napi_ok) {
             helpers.throw(env, "3rd arg is not a string") catch return null;
         }
