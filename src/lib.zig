@@ -5,6 +5,7 @@ const helpers = @import("helpers.zig");
 const enc = @import("encode.zig");
 const dec = @import("decode.zig");
 const seek_key = @import("seek_key.zig");
+const seek_path = @import("seek_path.zig");
 
 var alloc = std.heap.GeneralPurposeAllocator(.{}){};
 var allocator = &alloc.allocator;
@@ -16,6 +17,7 @@ export fn napi_register_module_v1(env: c.napi_env, exports: c.napi_value) c.napi
     helpers.register_function(env, exports, "seekKey", seekKey) catch return null;
     helpers.register_function(env, exports, "allocAndEncode", allocAndEncode) catch return null;
     helpers.register_function(env, exports, "slice", slice) catch return null;
+    helpers.register_function(env, exports, "seekPath", seekPath) catch return null;
     return exports;
 }
 
@@ -145,7 +147,7 @@ fn seekKey(env: c.napi_env, info: c.napi_callback_info) callconv(.C) c.napi_valu
     if (seek_key.seekKey(env, buffer, @intCast(u32, start_i), key)) |result| {
         return helpers.u32ToJS(env, result) catch return null;
     } else |err| switch(err) {
-        error.NOTFOUND => return helpers.i32ToJS(env, -1) catch return null
+        error.NOT_FOUND => return helpers.i32ToJS(env, -1) catch return null
     }
 }
 
@@ -166,4 +168,44 @@ fn slice(env: c.napi_env, info: c.napi_callback_info) callconv(.C) c.napi_value 
 
     var res = seek_key.slice(env, buffer, start) catch return null;
     return helpers.create_buffer(env, res, "could not create buffer")catch return null;
+}
+
+
+fn seekPath(env: c.napi_env, info: c.napi_callback_info) callconv(.C) c.napi_value {
+    var argc: usize = 4;
+    var argv: [4]c.napi_value = undefined;
+    if (c.napi_get_cb_info(env, info, &argc, &argv, null, null) != .napi_ok) {
+        helpers.throw(env, "Failed to get args") catch return null;
+    }
+    if (argc < 3) {
+        helpers.throw(env, "Not enough arguments") catch return null;
+    }
+
+    var buffer = helpers.slice_from_value(env, argv[0], "1st arg") catch return null;
+
+    var start_i: i32 = undefined;
+    if (c.napi_get_value_int32(env, argv[1], &start_i) != .napi_ok) {
+        helpers.throw(env, "Failed to get start") catch return null;
+    }
+
+    if (start_i == -1) {
+        return helpers.i32ToJS(env, -1) catch return null;
+    }
+
+    var target = helpers.slice_from_value(env, argv[2], "3rd arg") catch return null;
+
+    var target_start: u32 = 0;
+    if (argc >= 4) {
+        if (c.napi_get_value_uint32(env, argv[3], &target_start) != .napi_ok) {
+            helpers.throw(env, "Failed to get target_start") catch return null;            
+        }
+    }
+
+    if (seek_path.seekPath(env, buffer, @intCast(u32, start_i), target, target_start)) |res| {
+        return helpers.u32ToJS(env, res) catch return null;
+    } else |err| switch(err) {
+        error.NOT_FOUND => return helpers.i32ToJS(env, -1) catch return null,
+        error.NOT_AN_ARRAY => return helpers.throw(env, "path must be encoded array") catch return null,
+        error.NOT_STRING_OR_BUFFER => return helpers.throw(env, "path must be encoded array of strings") catch return null
+    }
 }
