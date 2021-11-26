@@ -131,14 +131,18 @@ fn seekKey(env: c.napi_env, info: c.napi_callback_info) callconv(.C) c.napi_valu
     var key: []u8 = undefined;
     if (helpers.isTypeof(env, argv[2], c.napi_valuetype.napi_string)) {
         // TODO document / modify bound
-        var len: usize = 2048;
         var bytes: usize = undefined;
-        if (c.napi_get_value_string_utf8(env, argv[2], @ptrCast([*c]u8, key), len, bytes) != .napi_ok) {
+        var len: usize = 1024;
+        key = allocator.alloc(u8, len) catch return null;
+        std.debug.print("Here\n", .{});
+        if (c.napi_get_value_string_utf8(env, argv[2], @ptrCast([*c]u8, key), len, &bytes) != .napi_ok) {
             helpers.throw(env, "3rd arg is not a string") catch return null;
         }
+        key = key[0..bytes];
     } else {
         key = helpers.slice_from_value(env, argv[2], "3rd arg") catch return null;
     }
+    defer allocator.free(key);
     if (seek_key.seekKey(env, buffer, @intCast(u32, start_i), key)) |result| {
         return helpers.u32ToJS(env, result) catch return null;
     } else |err| switch(err) {
