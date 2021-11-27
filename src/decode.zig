@@ -39,11 +39,9 @@ const Decoders = struct {
             return helpers.throw(env, "Bad length for decoding a double");
         }
         var end = start + len;
-        var array: [8]u8 = undefined;
-        std.mem.copy(u8, &array, source[start..end]);
-        var double = std.mem.bytesAsValue(f64, &array);
+        const double: f64 = @ptrCast(*const align(1) f64, source[start..end].ptr).*;
         var number: c.napi_value = undefined;
-        if (c.napi_create_double(env, double.*, &number) != .napi_ok) {
+        if (c.napi_create_double(env, double, &number) != .napi_ok) {
             return helpers.throw(env, "Failed to decode double");
         }
         return number;
